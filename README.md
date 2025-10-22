@@ -45,20 +45,22 @@ Network Monitor is a modern, real-time network monitoring application designed s
 ## Architecture
 
 ```
-┌─────────────────┐         WebSocket         ┌──────────────────┐
-│                 │ ◄──────────────────────── │                  │
-│   Next.js App   │                            │  FastAPI Server  │
-│   (Frontend)    │ ───────────────────────► │  (Backend)       │
-│   Port 3000     │      REST API Calls        │  Port 5000       │
-└─────────────────┘                            └──────────────────┘
-                                                        │
-                                                        │
-                                               ┌────────▼─────────┐
-                                               │                  │
-                                               │   macOS System   │
-                                               │  psutil + nettop │
-                                               │                  │
-                                               └──────────────────┘
+┌──────────────────────┐                    ┌──────────────────────┐
+│                      │     WebSocket      │                      │
+│   Next.js Frontend   │ ◄───────────────── │   FastAPI Backend    │
+│                      │                    │                      │
+│     Port 3000        │ ──────────────────►│     Port 5000        │
+│                      │   REST API Calls   │                      │
+└──────────────────────┘                    └──────────┬───────────┘
+                                                       │
+                                                       │
+                                                       │
+                                            ┌──────────▼───────────┐
+                                            │                      │
+                                            │    macOS System      │
+                                            │  psutil + nettop     │
+                                            │                      │
+                                            └──────────────────────┘
 ```
 
 ## Quick Start
