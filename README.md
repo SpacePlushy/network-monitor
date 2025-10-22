@@ -74,7 +74,7 @@ Network Monitor is a modern, real-time network monitoring application designed s
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/network-monitor.git
+git clone https://github.com/SpacePlushy/network-monitor.git
 cd network-monitor
 
 # Setup backend
@@ -457,9 +457,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Author
 
-**Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Website: [yourwebsite.com](https://yourwebsite.com)
+**SpacePlushy**
+- GitHub: [@SpacePlushy](https://github.com/SpacePlushy)
+- Email: fmp21994@gmail.com
 
 ---
 
