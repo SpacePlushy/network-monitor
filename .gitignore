@@ -76,3 +76,6 @@ htmlcov/
 *.tmp
 *.bak
 *.swp
+
+# Playwright MCP
+.playwright-mcp/
