@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { ArrowDown, ArrowUp, Activity, HardDrive } from 'lucide-react';
 import { formatSpeed, formatBytes } from '@/lib/utils';
 import type { Stats } from '@/types';
@@ -42,7 +43,7 @@ function StatCard({ title, value, icon, subtitle, color }: StatCardProps) {
   );
 }
 
-export function StatsCards({ stats }: StatsCardsProps) {
+export const StatsCards = memo(function StatsCards({ stats }: StatsCardsProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <StatCard
@@ -78,4 +79,4 @@ export function StatsCards({ stats }: StatsCardsProps) {
       />
     </div>
   );
-}
+});

@@ -6,11 +6,8 @@ Uses macOS nettop for per-process bandwidth tracking.
 import time
 import psutil
 import subprocess
-import re
-from collections import deque
 from typing import Dict, List, Optional
 from dataclasses import dataclass, asdict
-from datetime import datetime
 
 
 @dataclass
@@ -26,19 +23,6 @@ class Connection:
     upload_speed: float  # bytes per second
     download_speed: float  # bytes per second
     duration: float  # seconds
-    bytes_sent: int
-    bytes_received: int
-
-    def to_dict(self):
-        return asdict(self)
-
-
-@dataclass
-class BandwidthPoint:
-    """Single point in bandwidth history."""
-    timestamp: float
-    upload: float  # bytes per second
-    download: float  # bytes per second
 
     def to_dict(self):
         return asdict(self)
@@ -47,12 +31,8 @@ class BandwidthPoint:
 class NetworkMonitor:
     """Monitor network connections and bandwidth usage."""
 
-    def __init__(self, history_length: int = 60):
-        self.history_length = history_length
-        self.bandwidth_history: deque = deque(maxlen=history_length)
+    def __init__(self):
         self.connections: Dict[str, dict] = {}
-        self.previous_io_counters = None
-        self.previous_time = None
         self.start_time = time.time()
         self.total_bytes_sent = 0
         self.total_bytes_received = 0
@@ -66,29 +46,8 @@ class NetworkMonitor:
         self._update_io_counters()
 
     def _update_io_counters(self):
-        """Update network I/O counters for speed calculation."""
+        """Update network I/O counters for total bytes tracking."""
         current_counters = psutil.net_io_counters()
-        current_time = time.time()
-
-        if self.previous_io_counters is not None and self.previous_time is not None:
-            time_delta = current_time - self.previous_time
-            if time_delta > 0:
-                bytes_sent_delta = current_counters.bytes_sent - self.previous_io_counters.bytes_sent
-                bytes_recv_delta = current_counters.bytes_recv - self.previous_io_counters.bytes_recv
-
-                upload_speed = bytes_sent_delta / time_delta
-                download_speed = bytes_recv_delta / time_delta
-
-                # Add to bandwidth history
-                point = BandwidthPoint(
-                    timestamp=current_time,
-                    upload=upload_speed,
-                    download=download_speed
-                )
-                self.bandwidth_history.append(point)
-
-        self.previous_io_counters = current_counters
-        self.previous_time = current_time
         self.total_bytes_sent = current_counters.bytes_sent
         self.total_bytes_received = current_counters.bytes_recv
 
@@ -242,8 +201,6 @@ class NetworkMonitor:
                     'upload_speed': proc_bw['upload'],
                     'download_speed': proc_bw['download'],
                     'duration': duration,
-                    'bytes_sent': 0,
-                    'bytes_received': 0,
                     'start_time': existing['start_time']
                 }
             else:
@@ -259,8 +216,6 @@ class NetworkMonitor:
                     'upload_speed': proc_bw['upload'],
                     'download_speed': proc_bw['download'],
                     'duration': 0,
-                    'bytes_sent': 0,
-                    'bytes_received': 0,
                     'start_time': time.time()
                 }
 
@@ -301,7 +256,3 @@ class NetworkMonitor:
             'total_bytes_received': self.total_bytes_received,
             'uptime': time.time() - self.start_time
         }
-
-    def get_bandwidth_history(self) -> List[dict]:
-        """Get bandwidth history."""
-        return [point.to_dict() for point in self.bandwidth_history]

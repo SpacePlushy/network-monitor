@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, memo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
 
@@ -183,8 +183,10 @@ const createInitialOption = (): EChartsOption => {
   };
 };
 
-export function BandwidthChart({ realTimeData }: BandwidthChartProps) {
-  const [option, setOption] = useState<EChartsOption>(createInitialOption());
+export const BandwidthChart = memo(function BandwidthChart({ realTimeData }: BandwidthChartProps) {
+  // Memoize initial options to avoid recreating on every render
+  const initialOption = useMemo(() => createInitialOption(), []);
+  const [option, setOption] = useState<EChartsOption>(initialOption);
 
   useEffect(() => {
     if (!realTimeData) return;
@@ -192,27 +194,42 @@ export function BandwidthChart({ realTimeData }: BandwidthChartProps) {
     const now = new Date();
     const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${Math.floor(now.getMilliseconds() / 100)}`;
 
-    setOption((prevOption) => {
-      const newOption = JSON.parse(JSON.stringify(prevOption)); // Deep clone
+    setOption((prevOption: any) => {
+      // Optimized shallow cloning with structural sharing instead of deep clone
+      const prevXAxisData = prevOption.xAxis.data;
+      const prevDownloadData = prevOption.series[0].data;
+      const prevUploadData = prevOption.series[1].data;
 
-      // Get references to the data arrays
-      const xAxisData = newOption.xAxis.data;
-      const downloadData = newOption.series[0].data;
-      const uploadData = newOption.series[1].data;
+      // Create new arrays with updated data
+      const newXAxisData = [...prevXAxisData, timeStr];
+      const newDownloadData = [...prevDownloadData, realTimeData.download];
+      const newUploadData = [...prevUploadData, realTimeData.upload];
 
-      // Add new data points
-      xAxisData.push(timeStr);
-      downloadData.push(realTimeData.download);
-      uploadData.push(realTimeData.upload);
-
-      // Remove old data points if we exceed the max
-      if (xAxisData.length > MAX_DATA_POINTS) {
-        xAxisData.shift();
-        downloadData.shift();
-        uploadData.shift();
+      // Remove old data points if we exceed the max (sliding window)
+      if (newXAxisData.length > MAX_DATA_POINTS) {
+        newXAxisData.shift();
+        newDownloadData.shift();
+        newUploadData.shift();
       }
 
-      return newOption;
+      // Return new option with structural sharing
+      return {
+        ...prevOption,
+        xAxis: {
+          ...prevOption.xAxis,
+          data: newXAxisData
+        },
+        series: [
+          {
+            ...prevOption.series[0],
+            data: newDownloadData
+          },
+          {
+            ...prevOption.series[1],
+            data: newUploadData
+          }
+        ]
+      };
     });
   }, [realTimeData]);
 
@@ -233,4 +250,8 @@ export function BandwidthChart({ realTimeData }: BandwidthChartProps) {
       </div>
     </div>
   );
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison: only re-render if data actually changed
+  return prevProps.realTimeData?.upload === nextProps.realTimeData?.upload &&
+         prevProps.realTimeData?.download === nextProps.realTimeData?.download;
+});

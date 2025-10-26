@@ -13,8 +13,6 @@ export interface Connection {
   upload_speed: number;
   download_speed: number;
   duration: number;
-  bytes_sent: number;
-  bytes_received: number;
 }
 
 export interface Stats {
@@ -26,30 +24,12 @@ export interface Stats {
   uptime: number;
 }
 
-export interface BandwidthPoint {
-  timestamp: number;
-  upload: number;
-  download: number;
-}
-
 export interface NetworkData {
   connections: Connection[];
   stats: Stats;
-}
-
-export interface BandwidthHistory {
-  history: BandwidthPoint[];
-  count: number;
-}
-
-export interface ConnectionsResponse {
-  connections: Connection[];
-  count: number;
 }
 
 export interface WebSocketMessage {
   type: 'initial' | 'update' | 'pong';
   data?: NetworkData;
 }
-
-export type ConnectionState = 'ESTABLISHED' | 'LISTEN' | 'TIME_WAIT' | 'CLOSE_WAIT' | 'SYN_SENT' | 'SYN_RECV' | 'CLOSED' | 'FIN_WAIT1' | 'FIN_WAIT2' | 'CLOSING' | 'LAST_ACK';

@@ -18,7 +18,3 @@ CORS_ORIGINS = [
 
 # Monitoring settings
 UPDATE_INTERVAL = 0.1  # seconds between updates
-HISTORY_LENGTH = 30  # seconds of bandwidth history to keep
-
-# Connection settings
-CLEANUP_STALE_AFTER = 5  # seconds before removing stale connections

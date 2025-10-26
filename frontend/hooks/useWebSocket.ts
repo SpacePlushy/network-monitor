@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { getWebSocketURL } from '@/lib/api';
 import type { WebSocketMessage, NetworkData } from '@/types';
 
@@ -123,13 +123,13 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     };
   }, [reconnectInterval, maxReconnectAttempts]); // Only reconnect config in dependencies
 
-  const sendMessage = (message: any) => {
+  const sendMessage = useCallback((message: any) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(message));
     } else {
       console.warn('WebSocket is not connected. Cannot send message.');
     }
-  };
+  }, []); // No dependencies needed since we use refs
 
   return {
     data,
